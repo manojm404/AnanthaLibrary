@@ -1,23 +1,76 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AnanthaLibrary</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-white text-gray-900">
 
-<nav class="flex justify-between items-center p-6">
-    <a href="/" class="text-2xl font-bold">AnanthaLibrary</a>
-    <div class="space-x-6">
-        <a href="/" class="hover:text-indigo-600">Home</a>
-        <a href="#" class="hover:text-indigo-600">Browse</a>
-        <a href="#" class="hover:text-indigo-600">About</a>
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-white via-gray-50 to-gray-100 min-h-screen text-gray-900">
+
+<!-- NAVBAR -->
+<nav class="fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-lg border-b border-gray-200 transition">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+
+        <a href="/" class="text-2xl font-semibold tracking-tight hover:opacity-80 transition">
+            AnanthaLibrary
+        </a>
+
+        <div class="space-x-8 text-sm font-medium hidden md:block">
+            <a href="/" class="hover:text-indigo-600 transition">Home</a>
+            <a href="/browse" class="hover:text-indigo-600 transition">Browse</a>
+            <a href="#" class="hover:text-indigo-600 transition">About</a>
+        </div>
     </div>
 </nav>
 
-<div class="container mx-auto p-8">
+<div class="h-20"></div>
+
+<main class="max-w-6xl mx-auto px-6 py-16">
     {% block content %}{% endblock %}
-</div>
+</main>
+
+<footer class="mt-20 border-t border-gray-200 bg-white/60 backdrop-blur-sm">
+    <div class="max-w-6xl mx-auto px-6 py-10 text-sm text-gray-600 flex flex-col md:flex-row justify-between gap-6">
+
+        <div>
+            <p class="font-semibold text-gray-800">AnanthaLibrary</p>
+            <p class="mt-2 text-gray-500">
+                Preserving timeless spiritual literature.
+            </p>
+        </div>
+
+        <div class="space-y-2">
+            <p class="font-medium text-gray-700">Resources</p>
+            <a href="#" class="block hover:text-indigo-600 transition">About</a>
+            <a href="#" class="block hover:text-indigo-600 transition">Privacy</a>
+            <a href="#" class="block hover:text-indigo-600 transition">Sources</a>
+        </div>
+    </div>
+
+    <div class="text-center text-xs text-gray-400 pb-6">
+        © 2026 AnanthaLibrary
+    </div>
+</footer>
 
 </body>
 </html>

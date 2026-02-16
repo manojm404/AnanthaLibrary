@@ -1,20 +1,96 @@
 {% extends "layout.html" %}
-
 {% block content %}
 
-<div class="text-center space-y-8">
-    <h1 class="text-5xl font-bold">
-        Welcome to AnanthaLibrary
+<!-- HERO -->
+<section class="text-center space-y-8 fade-in">
+
+    <h1 class="text-5xl md:text-6xl font-bold tracking-tight leading-tight">
+        Timeless Wisdom.
+        <span class="text-indigo-600">Infinite Knowledge.</span>
     </h1>
 
-    <p class="text-lg text-gray-600">
-        Explore timeless spiritual literature in multiple Indian languages.
+    <p class="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
+        Discover sacred literature, ancient texts, and spiritual wisdom
+        across languages and generations.
     </p>
 
-    <a href="#"
-       class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition">
-        Start Exploring
-    </a>
-</div>
+    <div class="flex justify-center gap-6 pt-6">
+        <a href="/browse"
+           class="bg-indigo-600 text-white px-8 py-3 rounded-xl hover:bg-indigo-700 transition shadow-md">
+            Explore Library
+        </a>
+
+        <a href="#categories"
+           class="border border-gray-300 px-8 py-3 rounded-xl hover:bg-gray-100 transition">
+            Browse Categories
+        </a>
+    </div>
+
+</section>
+
+
+<!-- FEATURED SECTION -->
+<section class="mt-24">
+
+    <h2 class="text-3xl font-bold mb-10 tracking-tight">
+        Featured Texts
+    </h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+        {% for doc in featured %}
+        <div class="bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition border border-gray-100">
+
+            <h3 class="text-xl font-semibold">{{ doc.title }}</h3>
+
+            <p class="text-gray-500 mt-3">
+                {{ doc.language }} • {{ doc.category }}
+            </p>
+
+            <a href="/document/{{ doc.slug }}"
+               class="text-indigo-600 text-sm font-medium mt-6 inline-block">
+                Read →
+            </a>
+        </div>
+        {% endfor %}
+
+    </div>
+
+</section>
+
+
+<!-- CATEGORY SECTION -->
+<section id="categories" class="mt-24">
+
+    <h2 class="text-3xl font-bold mb-10 tracking-tight">
+        Browse by Category
+    </h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+        <a href="/browse?category=Stotra"
+           class="bg-white rounded-2xl p-10 shadow-sm hover:shadow-xl transition border border-gray-100 text-center">
+
+            <h3 class="text-xl font-semibold">Stotras</h3>
+            <p class="text-gray-500 mt-3">Devotional hymns and sacred chants.</p>
+        </a>
+
+        <a href="/browse?category=Scripture"
+           class="bg-white rounded-2xl p-10 shadow-sm hover:shadow-xl transition border border-gray-100 text-center">
+
+            <h3 class="text-xl font-semibold">Scriptures</h3>
+            <p class="text-gray-500 mt-3">Foundational spiritual teachings.</p>
+        </a>
+
+        <a href="/browse"
+           class="bg-white rounded-2xl p-10 shadow-sm hover:shadow-xl transition border border-gray-100 text-center">
+
+            <h3 class="text-xl font-semibold">All Texts</h3>
+            <p class="text-gray-500 mt-3">Explore the complete collection.</p>
+        </a>
+
+    </div>
+
+</section>
 
 {% endblock %}

@@ -1,11 +1,15 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from app.routers import home
+
+from app.database import Base, engine
+from app.routers import home, browse, document
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="AnanthaLibrary")
 
-# Mount static files
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
-# Include routers
 app.include_router(home.router)
+app.include_router(browse.router)
+app.include_router(document.router)
