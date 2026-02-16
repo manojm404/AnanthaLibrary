@@ -1,17 +1,11 @@
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from app.routers import home
 
-app = FastAPI()
+app = FastAPI(title="AnanthaLibrary")
 
-@app.get("/", response_class=HTMLResponse)
-def home():
-    return """
-    <html>
-        <head>
-            <title>AnanthaLibrary</title>
-        </head>
-        <body>
-            <h1>Welcome to AnanthaLibrary 🚀</h1>
-        </body>
-    </html>
-    """
+# Mount static files
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
+# Include routers
+app.include_router(home.router)
