@@ -13,10 +13,16 @@ def document_detail(request: Request, slug: str):
     if not doc:
         return templates.TemplateResponse(
             "document.html",
-            {"request": request, "content": "Document not found", "slug": slug}
+            {
+                "request": request,
+                "doc": None
+            }
         )
 
     return templates.TemplateResponse(
         "document.html",
-        {"request": request, "content": doc.content, "slug": slug}
+        {
+            "request": request,
+            "doc": doc
+        }
     )

@@ -10,6 +10,22 @@ class DocumentRepository:
         db.close()
         return docs
 
+    def create(self, title, slug, language, category, content):
+        db = SessionLocal()
+
+        doc = Document(
+            id=str(uuid.uuid4()),
+            title=title,
+            slug=slug,
+            language=language,
+            category=category,
+            content=content
+        )
+
+        db.add(doc)
+        db.commit()
+        db.close()
+
     def get_by_slug(self, slug: str):
         db = SessionLocal()
         doc = db.query(Document).filter(Document.slug == slug).first()

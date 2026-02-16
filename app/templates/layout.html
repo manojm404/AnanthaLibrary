@@ -1,76 +1,107 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AnanthaLibrary</title>
 
-    <!-- Tailwind -->
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- Tailwind (CLASS-ONLY DARK MODE) -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Alpine.js -->
+    <!-- Alpine -->
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
         html { scroll-behavior: smooth; }
-
-        .fade-in {
-            animation: fadeIn 0.8s ease forwards;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
     </style>
 </head>
 
-<body class="bg-gradient-to-br from-white via-gray-50 to-gray-100 min-h-screen text-gray-900">
+<body
+    x-data
+    x-init="
+        const saved = localStorage.getItem('dark');
+        if (saved === 'true') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    "
+    class="bg-white dark:bg-black
+           text-black dark:text-white
+           min-h-screen transition-colors duration-500">
+
 
 <!-- NAVBAR -->
-<nav class="fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-lg border-b border-gray-200 transition">
+<nav class="fixed top-0 left-0 right-0 z-50
+            bg-white dark:bg-black
+            border-b border-gray-200 dark:border-gray-700">
+
     <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
 
-        <a href="/" class="text-2xl font-semibold tracking-tight hover:opacity-80 transition">
+        <a href="/" class="text-2xl font-semibold tracking-tight">
             AnanthaLibrary
         </a>
 
-        <div class="space-x-8 text-sm font-medium hidden md:block">
-            <a href="/" class="hover:text-indigo-600 transition">Home</a>
-            <a href="/browse" class="hover:text-indigo-600 transition">Browse</a>
-            <a href="#" class="hover:text-indigo-600 transition">About</a>
+        <div class="flex items-center space-x-8 text-sm font-medium">
+
+            <a href="/" class="hover:text-indigo-600">Home</a>
+            <a href="/browse" class="hover:text-indigo-600">Browse</a>
+            <a href="#" class="hover:text-indigo-600">About</a>
+
+            <!-- Toggle -->
+            <button
+                @click="
+                    document.documentElement.classList.toggle('dark');
+                    localStorage.setItem(
+                        'dark',
+                        document.documentElement.classList.contains('dark')
+                    );
+                "
+                class="ml-4 px-3 py-1 border rounded">
+
+                🌙
+            </button>
+
         </div>
     </div>
 </nav>
 
 <div class="h-20"></div>
 
+<!-- CONTENT -->
 <main class="max-w-6xl mx-auto px-6 py-16">
     {% block content %}{% endblock %}
 </main>
 
-<footer class="mt-20 border-t border-gray-200 bg-white/60 backdrop-blur-sm">
-    <div class="max-w-6xl mx-auto px-6 py-10 text-sm text-gray-600 flex flex-col md:flex-row justify-between gap-6">
-
-        <div>
-            <p class="font-semibold text-gray-800">AnanthaLibrary</p>
-            <p class="mt-2 text-gray-500">
-                Preserving timeless spiritual literature.
-            </p>
-        </div>
-
-        <div class="space-y-2">
-            <p class="font-medium text-gray-700">Resources</p>
-            <a href="#" class="block hover:text-indigo-600 transition">About</a>
-            <a href="#" class="block hover:text-indigo-600 transition">Privacy</a>
-            <a href="#" class="block hover:text-indigo-600 transition">Sources</a>
-        </div>
-    </div>
-
-    <div class="text-center text-xs text-gray-400 pb-6">
-        © 2026 AnanthaLibrary
-    </div>
+<!-- FOOTER -->
+<footer class="mt-20 border-t border-gray-200 dark:border-gray-700 py-8 text-center text-sm text-gray-500">
+    © 2026 AnanthaLibrary
 </footer>
+
+<!-- Scroll Progress Bar -->
+{% if request.url.path.startswith('/document') %}
+<div id="progress-bar"
+     class="fixed top-0 left-0 h-1 bg-indigo-600 z-50 transition-all duration-150"
+     style="width: 0%;">
+</div>
+{% endif %}
+
+<script>
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.scrollY;
+        const docHeight = document.body.scrollHeight - window.innerHeight;
+        const progress = (scrollTop / docHeight) * 100;
+        document.getElementById('progress-bar').style.width = progress + "%";
+    });
+</script>
 
 </body>
 </html>
