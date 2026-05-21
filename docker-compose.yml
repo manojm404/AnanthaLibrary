@@ -1,0 +1,16 @@
+version: "3.8"
+services:
+  backend:
+    build: ./backend/anantha_backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/anantha_backend/.env.example
+    volumes:
+      - ./backend/anantha_backend:/app
+  frontend:
+    # Frontend is designed to run locally (Vite) or be deployed on Vercel.
+    # This placeholder service intentionally does nothing; run frontend locally:
+    # cd frontend/Anantha_Ui && npm install && npm run dev
+    image: alpine:3.18
+    command: ["/bin/sh", "-c", "echo Frontend managed locally or by Vercel; see README && sleep 3600"]

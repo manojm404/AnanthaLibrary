@@ -33,7 +33,7 @@ def load_verses():
     if VERSES_PATH:
         candidates.append(Path(VERSES_PATH))
     repo_root = Path(__file__).resolve().parents[1]
-    candidates.append(repo_root / "Anantha_Ui" / "src" / "data" / "verses.json")
+    candidates.append(repo_root / "frontend" / "Anantha_Ui" / "src" / "data" / "verses.json")
     candidates.append(Path(__file__).resolve().parent / "verses.json")
 
     for p in candidates:

@@ -4,7 +4,7 @@ Replace vectorizer/embedder with your chosen embeddings (sentence-transformers o
 from pathlib import Path
 import json
 
-VERSES_FILE = Path(__file__).resolve().parents[1] / "Anantha_Ui" / "src" / "data" / "verses.json"
+VERSES_FILE = Path(__file__).resolve().parents[1] / "frontend" / "Anantha_Ui" / "src" / "data" / "verses.json"
 
 
 def load_verses(path: Path = VERSES_FILE):

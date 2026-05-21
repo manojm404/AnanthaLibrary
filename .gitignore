@@ -1,0 +1,22 @@
+# Node
+node_modules/
+frontend/Anantha_Ui/node_modules/
+
+# Python
+backend/anantha_backend/.venv/
+backend/anantha_backend/chroma_db/
+
+# Env
+.env
+*.env
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+
+# Misc
+dist/
+build/
