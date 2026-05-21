@@ -98,7 +98,14 @@ def main():
     verses = load_local_verses()
     print(f"Loaded {len(verses)} local verses")
     if args.ingest:
-        print("ChromaDB ingestion not implemented. Use chroma_client.py to implement ingestion.")
+        try:
+            from . import chroma_client
+            db_path = os.getenv("CHROMA_DB_PATH", "./chroma_db")
+            count = chroma_client.ingest_verses(verses, db_path=db_path)
+            print(f"Ingested {count} verses into ChromaDB at {db_path}")
+        except Exception as e:
+            print("ChromaDB ingestion failed:", e)
+            print("Ensure chromadb and sentence-transformers are installed and CHROMA_DB_PATH is writable.")
 
 
 if __name__ == "__main__":

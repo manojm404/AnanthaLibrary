@@ -52,7 +52,25 @@ def load_verses():
 VERSES = load_verses()
 
 
+# Prefer semantic search via ChromaDB when available
+CHROMA_DB_PATH = os.getenv("CHROMA_DB_PATH", None)
+
+
 def search_verses(query: str, k: int = 5):
+    # If ChromaDB is configured, use semantic search
+    if CHROMA_DB_PATH:
+        try:
+            from . import chroma_client
+        except Exception:
+            # chroma_client import failed; fall back to local search
+            pass
+        else:
+            try:
+                return chroma_client.query(query, k=k, db_path=CHROMA_DB_PATH)
+            except Exception as e:
+                print("Chroma query failed, falling back to local search:", e)
+
+    # Fallback naive text search
     q = (query or "").lower()
     if not q:
         return []
