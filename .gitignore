@@ -4,7 +4,10 @@ frontend/Anantha_Ui/node_modules/
 
 # Python
 backend/anantha_backend/.venv/
+.venv_backend/
 backend/anantha_backend/chroma_db/
+chroma_db/
+backend.log
 
 # Env
 .env

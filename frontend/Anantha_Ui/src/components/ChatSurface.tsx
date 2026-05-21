@@ -1,3 +1,11 @@
+/**
+ * ChatSurface Component
+ * 
+ * The primary UI for conversational interaction with the AI.
+ * It manages the chat history state, handles user input, and communicates
+ * with the RAG backend via `chatApi`. It also supports context-aware starting
+ * states (e.g., clicking "Ask Anantha" from a specific verse).
+ */
 import { useEffect, useRef, useState } from "react";
 import { ArrowUp, BookOpen, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +17,10 @@ import type { Verse } from "@/lib/verses";
 import { getReference } from "@/lib/verses";
 import { CitationsDrawer } from "./CitationsDrawer";
 
+/**
+ * Generates the initial message for the chat.
+ * If the user opened the chat from a specific verse, it contextualizes the greeting.
+ */
 function makeSeed(verseContext?: Verse): ChatMessage[] {
   if (verseContext) {
     return [
@@ -49,13 +61,23 @@ export function ChatSurface({
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
+  // Auto-scroll to the bottom when new messages arrive or typing status changes
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, typing]);
 
+  /**
+   * Handles sending the user's message to the backend RAG pipeline.
+   * 1. Appends the user message to the UI.
+   * 2. Sets a typing indicator.
+   * 3. Calls the `chatApi` (which performs the vector search and LLM query).
+   * 4. Appends the AI response and any associated citations to the UI.
+   */
   async function send() {
     const text = input.trim();
     if (!text || typing) return;
+    
+    // Add user message to UI immediately
     const userMsg: ChatMessage = {
       id: makeId(),
       role: "user",
@@ -65,10 +87,14 @@ export function ChatSurface({
     setMessages((m) => [...m, userMsg]);
     setInput("");
     setTyping(true);
+    
     try {
+      // Call the RAG backend, passing the verseId context if available
       const { content, citations } = await chatApi(text, {
         verseId: verseContext?.id,
       });
+      
+      // Update UI with the AI's response and retrieved context (citations)
       setMessages((m) => [
         ...m,
         { id: makeId(), role: "assistant", content, citations, createdAt: Date.now() },

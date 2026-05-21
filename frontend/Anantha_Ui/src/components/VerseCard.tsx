@@ -1,3 +1,10 @@
+/**
+ * VerseCard Component
+ * 
+ * A reusable UI component for displaying a Bhagavad Gita verse.
+ * It presents the chapter/verse reference, Sanskrit text, and English translation.
+ * It also provides action buttons (Save, Ask Anantha, Remove).
+ */
 import { useState } from "react";
 import { Sparkles, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,12 +15,12 @@ import { SaveHeartButton } from "./SaveHeartButton";
 import { ChatModal } from "./ChatModal";
 
 type Props = {
-  verse: Verse;
-  truncate?: boolean;
-  showAsk?: boolean;
-  showSave?: boolean;
-  onRemove?: () => void;
-  className?: string;
+  verse: Verse;            // The verse data to display
+  truncate?: boolean;      // Whether to limit text lines (useful in lists)
+  showAsk?: boolean;       // Toggle the "Ask Anantha" button
+  showSave?: boolean;      // Toggle the heart/save button
+  onRemove?: () => void;   // Callback for removing from a custom list
+  className?: string;      // Custom styling classes
 };
 
 export function VerseCard({
@@ -24,6 +31,7 @@ export function VerseCard({
   onRemove,
   className,
 }: Props) {
+  // Controls the visibility of the contextual chat modal
   const [chatOpen, setChatOpen] = useState(false);
 
   return (
@@ -47,10 +55,12 @@ export function VerseCard({
         </div>
       </header>
 
+      {/* Sanskrit text with optional truncation */}
       <p className={cn("sanskrit text-[15px] text-foreground/90", truncate && "line-clamp-2")}>
         {verse.sanskrit}
       </p>
 
+      {/* English translation with optional truncation */}
       <p
         className={cn(
           "text-sm text-muted-foreground leading-relaxed",
@@ -60,6 +70,7 @@ export function VerseCard({
         {verse.translation}
       </p>
 
+      {/* 'Ask Anantha' Action: Opens a chat modal initialized with THIS verse as context */}
       {showAsk && (
         <div className="pt-1 mt-auto">
           <Button
@@ -71,6 +82,7 @@ export function VerseCard({
             <Sparkles className="h-3.5 w-3.5 mr-1.5" />
             Ask Anantha
           </Button>
+          {/* The modal mounts the ChatSurface component, passing the current verse context */}
           <ChatModal open={chatOpen} onOpenChange={setChatOpen} verseContext={verse} />
         </div>
       )}

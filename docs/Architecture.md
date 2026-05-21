@@ -1,120 +1,56 @@
-# Anantha Library – System Architecture (Final, Groq Edition)
+# System Architecture – Anantha Library
 
-**Version:** 2.1  
-**Date:** May 21, 2026  
-**Status:** Frozen – no changes without written approval
+Anantha Library uses a decoupled, three-tier architecture designed to provide a seamless conversational experience while ensuring user privacy and high performance.
 
-## 1. High‑Level Overview
+---
 
-Anantha Library is a spiritual web application that provides semantic search and conversational Q&A over the Bhagavad Gita using **Groq API** (cloud LLM) instead of a local model. The system is split into two independent parts:
+## 🏗️ 1. High-Level Overview
 
-- **Frontend:** TanStack Start (React) hosted on Vercel, with multi‑language UI and client‑side persistence (localStorage).  
-  *Repository:* `anantha_ui`
-- **Backend AI Service:** A lightweight DigitalOcean droplet running ChromaDB (vector search) and a Flask proxy that calls the **Groq API** (free tier).  
-  *Repository:* `anantha_backend`
+The system is split into a **Frontend UI** (hosted on Vercel) and a **Backend AI Service** (hosted on a DigitalOcean droplet). The connection is handled via a server-side proxy in TanStack Start to ensure API keys and backend URLs remain secure.
 
-The frontend communicates with its own serverless API routes (Lovable / TanStack Start), which forward requests to the droplet. There is **no user authentication** – the “Enter Library” button is a mock entrance.
+```mermaid
+graph TD
+    Browser[Browser / User] -->|HTTPS| Frontend[Vercel: TanStack Start UI]
+    Frontend -->|Internal Proxy| Backend[DigitalOcean: Flask API]
+    Backend -->|Semantic Search| ChromaDB[(ChromaDB: Vector DB)]
+    Backend -->|Contextual Prompt| Groq[Groq API: Llama-3 LLM]
+    Groq -->|Dynamic Answer| Backend
+    Backend -->|Answer + Citations| Frontend
+```
 
-## 2. Data Flow (Chat Example)
+---
 
-User types message → Frontend calls `/api/chat` (Lovable API route)  
-→ Lovable API route forwards to `http://<droplet-ip>:8000/chat`  
-→ Flask server embeds query (sentence‑transformers)  
-→ ChromaDB returns top‑k relevant verses  
-→ Flask builds prompt and calls **Groq API** (llama‑3.3‑70b‑versatile)  
-→ Groq returns answer with citations → Flask returns `{answer, citations}` → Lovable API route → Frontend displays
+## 🧠 2. The RAG Pipeline (Retrieval-Augmented Generation)
 
-## 3. Components
+The core "brain" of Anantha Library is the RAG pipeline. Here is how a user question is processed:
 
-### 3.1 Frontend (Lovable / TanStack Start)
-- **Location:** Vercel (production), local development in PyCharm.
-- **Repository:** `anantha_ui`
-- **Key files:**
-  - `src/routes/` – pages (landing, app, search, chat, library, wisdom)
-  - `src/routes/api/` – serverless proxies (`search.ts`, `chat.ts`, `daily.ts`)
-  - `src/lib/api.ts` – frontend client calling `/api/*`
-  - `src/lib/i18n.ts` – multi‑language support (6 Indian languages)
-- **Persistence:** localStorage for saved verses, journal, streak, language preference.
-- **No database, no auth.**
+1.  **Input:** User asks: *"I feel overwhelmed by my responsibilities."*
+2.  **Embedding:** The backend uses `sentence-transformers` to convert this text into a 384-dimensional mathematical vector.
+3.  **Retrieval:** ChromaDB searches its index to find the 5 verses whose vectors are most "similar" to the user's question (e.g., verses about *Karma Yoga* or *Duty*).
+4.  **Augmentation:** The backend builds a specialized prompt:
+    > "You are Anantha, a wise guide. User asks: [User Question]. Use these Gita verses as context: [Verse 1, Verse 2...]. Answer the user with compassion."
+5.  **Generation:** This prompt is sent to the **Groq API**. The LLM (Llama-3) generates a human-like response *using only the provided verses*.
+6.  **Response:** The UI displays the AI's answer alongside clickable **Citations** that lead the user back to the source verses.
 
-### 3.2 Backend AI Service (DigitalOcean Droplet)
-- **IP:** `142.93.7.31` (current)
-- **Plan:** 4 GB RAM / 2 vCPUs ($24/month, covered by GitHub Student Pack)
-- **Services:**
-  - ChromaDB (persistent vector store at `/root/anantha_backend/chroma_db`)
-  - Flask server (port 8000) with endpoints:
-    - `POST /search` → returns top‑k verses (no LLM)
-    - `POST /chat` → retrieves verses, calls **Groq API**, returns answer + citations
-    - `GET /daily` → returns random verse + static reflection/practice
-- **Code repository:** GitHub `anantha_backend` (cloned on droplet)
+---
 
-### 3.3 Proxy Layer (Lovable API Routes)
-- Each route reads `AI_SERVICE_URL` environment variable.
-- If the droplet is unreachable, they return mock data (fallback).
+## 🗄️ 3. Data Architecture
 
-## 4. Deployment Diagram
-[User Browser]
-│
-▼
-[Vercel – Frontend (anantha_ui)]
-│
-│ calls /api/*
-▼
-[Lovable Serverless Functions] (same Vercel project)
-│
-│ HTTP to droplet:8000
-▼
-[DigitalOcean Droplet (anantha_backend)]
-├─ Flask (port 8000)
-├─ ChromaDB
-├─ Git repo (cloned)
-└─ (No local LLM – uses Groq API)
-│
-│ HTTPS
-▼
-[Groq Cloud] – llama-3.3-70b-versatile
+-   **Vector Storage:** `ChromaDB` stores the 701 verses of the Bhagavad Gita as high-dimensional vectors. This allows for "meaning-based" searching rather than just "keyword-based" searching.
+-   **Local Storage:** User data (saved verses, journal entries, streaks, and theme settings) never leaves the user's browser. It is stored in `localStorage` for maximum privacy.
 
+---
 
+## 🛡️ 4. Security & Performance
 
-## 5. Environment Variables
+-   **API Proxying:** The frontend does not call the DigitalOcean droplet directly from the browser. Instead, it uses a **Server Side Handler** (`ai-proxy.server.ts`). This hides the backend IP and credentials from the public internet.
+-   **Rate Limiting:** The backend implements a **Sliding-Window Rate Limiter**. If the Groq API limit is reached (30 requests per minute), the backend will automatically "pause" and wait for a slot to open up rather than returning an error to the user.
+-   **Graceful Degradation:** If the backend is unreachable, the frontend automatically falls back to a "Mock Mode," using a local copy of the verses (`verses.json`) to provide basic search functionality.
 
-| Variable | Where | Value |
-|----------|-------|-------|
-| `AI_SERVICE_URL` | Vercel (frontend) | `http://142.93.7.31:8000` |
-| `GROQ_API_KEY` | DigitalOcean droplet (Flask) | Your free Groq API key |
-| No other secrets | – | – |
+---
 
-## 6. Security & Constraints
+## ⚙️ 5. Deployment
 
-- No authentication – all pages public.
-- All API calls are HTTP (no HTTPS on droplet – for MVP only; upgrade later with Let's Encrypt).
-- Rate limiting: Groq free tier applies (30 RPM, 14,400 RPD). The Flask service does not add extra limits.
-- Data privacy: user queries are sent to Groq (third party). Acceptable for MVP; can be replaced with self‑hosted later.
-- User data (saved verses, journal) stays in browser localStorage – no collection by backend.
-
-## 7. Failure Modes & Recovery
-
-| Failure | Recovery |
-|---------|----------|
-| Droplet unreachable | Lovable API routes return mock data; UI remains functional. |
-| Groq API key invalid or rate‑limited | Fallback to static message in Flask; rotate key or implement queue. |
-| ChromaDB corrupted | Re‑run `python3 ingest.py` (needs a valid `gita_verses.json`). |
-| Out of DigitalOcean credits | Move ChromaDB to a free tier (e.g., Pinecone) or downgrade to 2 GB droplet. |
-
-## 8. Diagram (ASCII)
-┌─────────────┐ ┌─────────────────┐ ┌──────────────────────────┐ ┌─────────────┐
-│ Browser │────▶│ Vercel (Next) │────▶│ DigitalOcean Droplet │────▶│ Groq API │
-│ (TanStack) │ │ /api/* proxies │ │ Flask :8000 │ │ (LLM cloud) │
-└─────────────┘ └─────────────────┘ │ │ │ └─────────────┘
-│ ├─ ChromaDB │
-│ └─ (no local LLM) │
-└──────────────────────────┘
-
-
-## 9. Repositories
-
-
-## 10. Approval
-
-This document reflects the **final, deployed state** as of May 21, 2026.  
-Any changes require written approval and must be reflected in both code repositories.
+-   **UI:** Continuous deployment via **Vercel**.
+-   **Backend:** Dockerized and managed on **DigitalOcean**.
+-   **API:** Groq (Cloud-based inference for high speed).
