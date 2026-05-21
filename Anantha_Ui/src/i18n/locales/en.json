@@ -1,0 +1,86 @@
+{
+  "nav": {
+    "home": "Home",
+    "search": "Search",
+    "chat": "Chat",
+    "library": "Library",
+    "wisdom": "Wisdom"
+  },
+  "common": {
+    "language": "Language",
+    "theme": "Theme",
+    "back": "Back",
+    "loading": "Loading…",
+    "save": "Save",
+    "remove": "Remove",
+    "today": "Today"
+  },
+  "landing": {
+    "badge": "A quiet space for the Bhagavad Gita",
+    "title": "Wisdom that meets you",
+    "title_accent": "where you are.",
+    "subtitle": "Search 700 verses, save what speaks to you, and let Anantha guide you through the teachings of Krishna — one reflection at a time.",
+    "cta_primary": "Enter Library",
+    "cta_secondary": "Today's wisdom",
+    "features_title": "What you'll find inside",
+    "feature_search_title": "Search the Gita",
+    "feature_search_body": "Find verses by theme, feeling, or chapter reference — instantly.",
+    "feature_chat_title": "Chat with Anantha",
+    "feature_chat_body": "Ask questions and receive grounded answers, with verse citations.",
+    "feature_save_title": "Save & Reflect",
+    "feature_save_body": "Build a personal library, journal your reflections, keep a daily streak."
+  },
+  "home": {
+    "hero_pill": "A quiet space for the Bhagavad Gita",
+    "hero_title": "Wisdom that meets you",
+    "hero_title_accent": "where you are.",
+    "hero_subtitle": "Search 700 verses, save what speaks to you, and let Anantha guide you through the teachings of Krishna — one reflection at a time.",
+    "search_placeholder": "Search verses, themes, feelings…",
+    "search_button": "Search",
+    "verse_of_day": "Verse of the Day",
+    "todays_wisdom": "Today's wisdom →",
+    "how_title": "How it works",
+    "step_search_title": "Search",
+    "step_search_body": "Find verses by theme, feeling, or reference.",
+    "step_save_title": "Save",
+    "step_save_body": "Build a personal library of verses that move you.",
+    "step_reflect_title": "Reflect",
+    "step_reflect_body": "Ask Anantha to explain, contextualize, and guide."
+  },
+  "search": {
+    "placeholder": "Search verses, themes, references…",
+    "searching": "Searching…",
+    "count_one": "{{count}} verse",
+    "count_other": "{{count}} verses",
+    "matching": "matching",
+    "empty": "No verses found. Try a different theme or feeling."
+  },
+  "library": {
+    "title": "Your Library",
+    "count_one": "{{count}} saved verse",
+    "count_other": "{{count}} saved verses",
+    "empty_prefix": "Your library is empty. Save verses that move you from",
+    "empty_link": "Search"
+  },
+  "wisdom": {
+    "today": "Today",
+    "streak": "day streak",
+    "reflection_title": "Reflection",
+    "reflection_body": "Where in your life today are you holding onto an outcome? Notice the grasp without judgment, and let the act itself be enough.",
+    "practice_title": "Practice",
+    "practice_body": "Before your next task, pause for three breaths. Offer the work — not its result — as your contribution.",
+    "journal_title": "Journal",
+    "journal_placeholder": "What did this verse stir in you today?",
+    "journal_saved": "Saved automatically.",
+    "applied": "Applied today — see you tomorrow",
+    "apply": "I applied this today"
+  },
+  "chat": {
+    "intro": "Namaste. I am Anantha — your companion to the Bhagavad Gita. Ask me about a verse, a feeling you're working through, or a question life has placed before you.",
+    "placeholder": "Ask Anantha…",
+    "send": "Send message",
+    "thinking": "Anantha is meditating",
+    "sources": "Sources",
+    "ask": "Ask Anantha"
+  }
+}
