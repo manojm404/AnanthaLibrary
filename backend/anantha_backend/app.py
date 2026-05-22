@@ -147,10 +147,10 @@ def load_verses():
 VERSES = load_verses()
 
 # Semantic search path configuration
-CHROMA_DB_PATH = os.getenv("CHROMA_DB_PATH", None)
+CHROMA_DB_PATH = os.getenv("CHROMA_DB_PATH", str(Path(__file__).resolve().parent / "chroma_db"))
 
 
-def search_verses(query: str, k: int = 5):
+def search_verses(query: str, k: int = 5, book_id: str = None):
     """
     Core search logic for the RAG pipeline.
     Prioritizes semantic search via ChromaDB for better relevance.
@@ -159,8 +159,8 @@ def search_verses(query: str, k: int = 5):
     if CHROMA_DB_PATH:
         try:
             import chroma_client
-            # Semantic search finds verses with similar meaning, even if words don't match exactly
-            return chroma_client.query(query, k=k, db_path=CHROMA_DB_PATH)
+            # Semantic search finds verses with similar meaning, optionally filtered by book
+            return chroma_client.query(query, k=k, book_id=book_id, db_path=CHROMA_DB_PATH)
         except Exception as e:
             print("Chroma query failed, falling back to local search:", e)
 
@@ -170,6 +170,10 @@ def search_verses(query: str, k: int = 5):
         return []
     scored = []
     for v in VERSES:
+        # Filter by book_id in local data if provided
+        if book_id and v.get("book_id") != book_id:
+            continue
+            
         text = (v.get("text") or "").lower()
         score = 0
         if q in text:
@@ -182,13 +186,44 @@ def search_verses(query: str, k: int = 5):
     return [v for _s, v in scored[:k]]
 
 
+@app.route("/books", methods=["GET"])
+def get_books():
+    """Returns a list of available books, discovered from local data or ChromaDB."""
+    try:
+        # Prioritize discovery from the local JSON file for speed and reliability
+        unique_books = {}
+        for v in VERSES:
+            bid = v.get("book_id")
+            btitle = v.get("book_title")
+            if bid and bid not in unique_books:
+                unique_books[bid] = btitle or bid
+        
+        if unique_books:
+            books = [{"id": bid, "title": btitle} for bid, btitle in unique_books.items()]
+            return jsonify({"books": books})
+
+        # Fallback to ChromaDB discovery if local analysis is empty
+        import chroma_client
+        books = chroma_client.get_available_books(db_path=CHROMA_DB_PATH)
+        
+        # Default fallback if absolutely nothing found
+        if not books:
+            books = [{"id": "gita", "title": "Bhagavad Gita"}]
+            
+        return jsonify({"books": books})
+    except Exception as e:
+        print("Error fetching books:", e)
+        return jsonify({"books": [{"id": "gita", "title": "Bhagavad Gita"}]})
+
+
 @app.route("/search", methods=["POST"]) 
 def search():
     """API endpoint for basic verse retrieval based on a query."""
     data = request.get_json(force=True, silent=True) or {}
     query = data.get("query")
+    book_id = data.get("book")
     k = int(data.get("k", 5))
-    results = search_verses(query, k)
+    results = search_verses(query, k, book_id=book_id)
     return jsonify({"query": query, "results": results})
 
 
@@ -202,10 +237,11 @@ def chat():
     """
     data = request.get_json(force=True, silent=True) or {}
     query = data.get("prompt") or data.get("query")
+    book_id = data.get("book")
     k = int(data.get("k", 5))
     
     # Step 1: Retrieve context (verses)
-    citations = search_verses(query, k)
+    citations = search_verses(query, k, book_id=book_id)
 
     # Step 2: Build Augmented Prompt
     # We provide the verses as grounded facts to the LLM to minimize hallucinations.
@@ -228,19 +264,20 @@ def chat():
 
     # Fallback to predefined responses if the LLM is unavailable or unconfigured
     fallback_responses = [
-        "The Gita reminds us that peace is found not in changing the world, but in steadying the mind. Act with devotion, release the fruits, and let stillness become your foundation.",
-        "Krishna teaches Arjuna that the self is eternal — untouched by sorrow, fire, or time. When you remember this, fear softens and clarity returns.",
+        "Ancient wisdom reminds us that peace is found not in changing the world, but in steadying the mind. Act with devotion, release the fruits, and let stillness become your foundation.",
+        "The self is eternal — untouched by sorrow, fire, or time. When you remember this, fear softens and clarity returns.",
         "Equanimity in success and failure is the heart of yoga. Begin small: notice when you grasp at outcomes, and gently return to the present action."
     ]
     
     q_lower = (query or "").strip().lower()
     if q_lower in ["hi", "hello", "namaste", "hey", "greetings"]:
-        answer_text = "Namaste. I am Anantha — your companion to the Bhagavad Gita. Ask me about a verse, a feeling you're working through, or a question life has placed before you."
+        answer_text = "Namaste. I am Anantha — your companion to sacred texts. Ask me about a verse, a feeling you're working through, or a question life has placed before you."
         citations = []
     else:
         answer_text = random.choice(fallback_responses) + "\n\n(Note: I am currently running in offline mode. For dynamic answers, please configure the GROQ_API_KEY in the backend.)"
 
     return jsonify({"query": query, "content": answer_text, "citations": citations})
+
 
 
 @app.route("/health", methods=["GET"])  

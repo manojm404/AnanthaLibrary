@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { Logo } from "./Logo";
 import { ThemeToggle } from "./ThemeToggle";
 import { Button } from "@/components/ui/button";
+import { BookSelector } from "./BookSelector";
 
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
@@ -22,6 +23,12 @@ export function AppSidebar() {
       <div className={cn("flex items-center h-16 px-4", collapsed && "justify-center px-0")}>
         <Logo collapsed={collapsed} />
       </div>
+
+      {!collapsed && (
+        <div className="px-4 mb-4">
+          <BookSelector />
+        </div>
+      )}
 
       <nav aria-label="Primary" className="flex-1 px-3">
         <ul className="space-y-1">

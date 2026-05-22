@@ -9,13 +9,21 @@ import data from "@/data/verses.json";
 
 export type Verse = {
   id: string;              // Unique identifier (e.g., "gita:1:1")
-  chapter: number | string; // Chapter number
-  verse: number | string;   // Verse number within the chapter
-  sanskrit: string;        // Original Sanskrit text
+  chapter: number | string; // Chapter or Section identifier
+  verse: number | string;   // Verse or Sentence identifier
+  sanskrit: string;        // Original primary text (e.g., Sanskrit)
   translation: string;     // English translation
   hindi?: string;          // Optional Hindi translation
-  transliteration?: string;// Optional romanized Sanskrit
-  text?: string;           // Combined text used primarily for backend indexing
+  transliteration?: string;// Optional transliteration
+  text?: string;           // Combined text block
+  audio_url?: string;      // URL to audio clip
+  book_id?: string;        // ID of the book (e.g., "gita")
+  book_title?: string;     // Title of the book
+};
+
+export type Book = {
+  id: string;
+  title: string;
 };
 
 // The complete, locally bundled dataset of all verses
@@ -24,13 +32,18 @@ export const ALL_VERSES: Verse[] = data as Verse[];
 /**
  * Performs a basic, case-insensitive keyword search across the local dataset.
  * This is used when the semantic search backend (ChromaDB) is unreachable.
- * 
- * It checks translations, sanskrit, hindi, and chapter:verse references.
  */
-export function searchVerses(query: string): Verse[] {
+export function searchVerses(query: string, book_id?: string): Verse[] {
   const q = query.trim().toLowerCase();
-  if (!q) return ALL_VERSES;
-  return ALL_VERSES.filter((v) => {
+  
+  // Filter by book if specified
+  const pool = book_id 
+    ? ALL_VERSES.filter(v => v.book_id === book_id)
+    : ALL_VERSES;
+
+  if (!q) return pool;
+  
+  return pool.filter((v) => {
     return (
       (v.translation || "").toLowerCase().includes(q) ||
       (v.sanskrit || "").toLowerCase().includes(q) ||
@@ -43,12 +56,16 @@ export function searchVerses(query: string): Verse[] {
 }
 
 /**
- * Retrieves a pseudo-random verse based on the current date.
- * Ensures all users see the same 'Verse of the Day' on a given day.
+ * Retrieves a pseudo-random verse based on the current date and active book.
  */
-export function getVerseOfDay(): Verse {
-  const day = Math.floor(Date.now() / 86_400_000); // Days since epoch
-  return ALL_VERSES[day % ALL_VERSES.length];
+export function getVerseOfDay(book_id?: string): Verse {
+  const day = Math.floor(Date.now() / 86_400_000); 
+  const pool = book_id 
+    ? ALL_VERSES.filter(v => v.book_id === book_id)
+    : ALL_VERSES;
+    
+  if (pool.length === 0) return ALL_VERSES[day % ALL_VERSES.length];
+  return pool[day % pool.length];
 }
 
 /**

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { VerseCard } from "@/components/VerseCard";
 import { searchApi } from "@/lib/api";
 import type { Verse } from "@/lib/verses";
+import { useLibrary } from "@/hooks/use-library";
 
 const searchSchema = z.object({
   q: fallback(z.string(), "").default(""),
@@ -25,6 +26,7 @@ export const Route = createFileRoute("/search")({
 
 function SearchPage() {
   const { q } = Route.useSearch();
+  const { activeBookId } = useLibrary();
   const navigate = useNavigate({ from: "/search" });
   const [query, setQuery] = useState(q);
   const [results, setResults] = useState<Verse[]>([]);
@@ -33,7 +35,7 @@ function SearchPage() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    searchApi(q).then((r) => {
+    searchApi(q, activeBookId).then((r) => {
       if (!cancelled) {
         setResults(r);
         setLoading(false);
@@ -42,7 +44,7 @@ function SearchPage() {
     return () => {
       cancelled = true;
     };
-  }, [q]);
+  }, [q, activeBookId]);
 
   return (
     <div className="mx-auto max-w-6xl px-4 md:px-8 py-6 md:py-10 space-y-6">

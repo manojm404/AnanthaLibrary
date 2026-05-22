@@ -5,8 +5,8 @@
  * It presents the chapter/verse reference, Sanskrit text, and English translation.
  * It also provides action buttons (Save, Ask Anantha, Remove).
  */
-import { useState } from "react";
-import { Sparkles, Trash2 } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Sparkles, Trash2, Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Verse } from "@/lib/verses";
@@ -33,6 +33,33 @@ export function VerseCard({
 }: Props) {
   // Controls the visibility of the contextual chat modal
   const [chatOpen, setChatOpen] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    };
+  }, []);
+
+  const toggleAudio = () => {
+    if (!verse.audio_url) return;
+    
+    if (!audioRef.current) {
+      audioRef.current = new Audio(verse.audio_url);
+      audioRef.current.onended = () => setIsPlaying(false);
+    }
+
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      audioRef.current.play();
+      setIsPlaying(true);
+    }
+  };
 
   return (
     <article
@@ -42,9 +69,22 @@ export function VerseCard({
       )}
     >
       <header className="flex items-start justify-between gap-2">
-        <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary tracking-wide">
-          Ch {getReference(verse)}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary tracking-wide">
+            {verse.book_title || "Gita"} {getReference(verse)}
+          </span>
+          {verse.audio_url && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-6 w-6 rounded-full hover:bg-primary/20 text-primary"
+              onClick={toggleAudio}
+              aria-label={isPlaying ? "Pause audio" : "Play audio"}
+            >
+              {isPlaying ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3 ml-0.5" />}
+            </Button>
+          )}
+        </div>
         <div className="flex items-center -mr-2">
           {showSave && <SaveHeartButton verse={verse} />}
           {onRemove && (

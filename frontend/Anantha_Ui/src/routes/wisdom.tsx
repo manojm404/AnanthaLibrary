@@ -8,6 +8,7 @@ import { getDailyVerse } from "@/lib/api";
 import { useJournal, useStreak } from "@/hooks/use-journal";
 import { SaveHeartButton } from "@/components/SaveHeartButton";
 import { cn } from "@/lib/utils";
+import { useLibrary } from "@/hooks/use-library";
 
 export const Route = createFileRoute("/wisdom")({
   head: () => ({
@@ -20,10 +21,11 @@ export const Route = createFileRoute("/wisdom")({
 });
 
 function WisdomPage() {
-  const [verse, setVerse] = useState<Verse>(() => getVerseOfDay());
+  const { activeBookId } = useLibrary();
+  const [verse, setVerse] = useState<Verse>(() => getVerseOfDay(activeBookId));
   useEffect(() => {
     getDailyVerse().then(setVerse).catch(() => {});
-  }, []);
+  }, [activeBookId]);
   const { text, setText } = useJournal();
   const { streak, appliedToday, apply } = useStreak();
   const dateLabel = new Date().toLocaleDateString(undefined, {
@@ -54,7 +56,7 @@ function WisdomPage() {
       <section className="glass rounded-2xl p-6 md:p-8 space-y-4">
         <div className="flex items-center justify-between">
           <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary">
-            Ch {getReference(verse)}
+            {verse.book_title || "Gita"} {getReference(verse)}
           </span>
           <SaveHeartButton verse={verse} />
         </div>

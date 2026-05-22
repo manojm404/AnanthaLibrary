@@ -6,7 +6,7 @@
  * unavailable, it falls back to local data processing to ensure the
  * app remains functional.
  */
-import type { Verse } from "./verses";
+import type { Verse, Book } from "./verses";
 import { ALL_VERSES, getVerseOfDay, searchVerses } from "./verses";
 
 export type ChatApiResponse = {
@@ -16,6 +16,10 @@ export type ChatApiResponse = {
 
 export type SearchApiResponse = {
   results: Verse[];
+};
+
+export type BooksApiResponse = {
+  books: Book[];
 };
 
 /**
@@ -41,32 +45,44 @@ async function getJson<T>(path: string): Promise<T> {
 }
 
 /**
+ * Fetches available books from the backend.
+ */
+export async function getBooks(): Promise<Book[]> {
+  try {
+    const data = await getJson<BooksApiResponse>("/api/books");
+    return data.books || [];
+  } catch (err) {
+    console.error("getBooks failed:", err);
+    return [{ id: "gita", title: "Bhagavad Gita" }];
+  }
+}
+
+/**
  * Searches for verses using the backend's semantic search.
  * Falls back to local keyword search if the backend is down.
  */
-export async function searchApi(query: string): Promise<Verse[]> {
+export async function searchApi(query: string, book?: string): Promise<Verse[]> {
   try {
-    const data = await postJson<SearchApiResponse | Verse[]>("/api/search", { query });
+    const data = await postJson<SearchApiResponse | Verse[]>("/api/search", { query, book });
     if (Array.isArray(data)) return data;
     return data.results ?? [];
   } catch (err) {
     console.error("searchApi failed, falling back to local:", err);
     // Local fallback ensures user can still search even without a running backend
-    return searchVerses(query);
+    return searchVerses(query, book);
   }
 }
 
 /**
  * Sends a prompt to the RAG chat endpoint.
- * On failure, it provides a thoughtful fallback response and random citations
- * to simulate the chat experience.
  */
 export async function chatApi(
   prompt: string,
+  book?: string,
   context?: { verseId?: string },
 ): Promise<ChatApiResponse> {
   try {
-    return await postJson<ChatApiResponse>("/api/chat", { prompt, context });
+    return await postJson<ChatApiResponse>("/api/chat", { prompt, book, context });
   } catch (err) {
     console.error("chatApi failed, falling back to local:", err);
     // Mocking the RAG response for offline mode
@@ -77,7 +93,7 @@ export async function chatApi(
     }
     return {
       content:
-        "The Gita reminds us that peace is found not in changing the world, but in steadying the mind. Act with devotion, release the fruits, and let stillness become your foundation.",
+        "Sacred texts remind us that peace is found not in changing the world, but in steadying the mind. Act with devotion, release the fruits, and let stillness become your foundation.",
       citations,
     };
   }

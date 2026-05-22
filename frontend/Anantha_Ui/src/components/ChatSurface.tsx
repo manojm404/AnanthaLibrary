@@ -16,6 +16,7 @@ import { chatApi } from "@/lib/api";
 import type { Verse } from "@/lib/verses";
 import { getReference } from "@/lib/verses";
 import { CitationsDrawer } from "./CitationsDrawer";
+import { useLibrary } from "@/hooks/use-library";
 
 /**
  * Generates the initial message for the chat.
@@ -27,7 +28,7 @@ function makeSeed(verseContext?: Verse): ChatMessage[] {
       {
         id: makeId(),
         role: "assistant",
-        content: `Let's reflect together on Chapter ${getReference(verseContext)}. What would you like to ask about this verse?`,
+        content: `Let's reflect together on this passage. What would you like to ask about it?`,
         createdAt: Date.now(),
         citations: [verseContext],
       },
@@ -38,7 +39,7 @@ function makeSeed(verseContext?: Verse): ChatMessage[] {
       id: makeId(),
       role: "assistant",
       content:
-        "Namaste. I am Anantha — your companion to the Bhagavad Gita. Ask me about a verse, a feeling you're working through, or a question life has placed before you.",
+        "Namaste. I am Anantha — your companion to sacred texts. Ask me a question, share a feeling you're working through, or seek guidance from ancient wisdom.",
       createdAt: Date.now(),
     },
   ];
@@ -51,9 +52,10 @@ export function ChatSurface({
   verseContext?: Verse;
   variant?: "page" | "modal";
 }) {
+  const { activeBookId } = useLibrary();
   const [messages, setMessages] = useState<ChatMessage[]>(() => makeSeed(verseContext));
   const [input, setInput] = useState(
-    verseContext ? `Help me understand the meaning of ${getReference(verseContext)}.` : "",
+    verseContext ? `Help me understand the meaning of this passage.` : "",
   );
   const [typing, setTyping] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -89,8 +91,8 @@ export function ChatSurface({
     setTyping(true);
     
     try {
-      // Call the RAG backend, passing the verseId context if available
-      const { content, citations } = await chatApi(text, {
+      // Call the RAG backend, passing the active book and optional verse context
+      const { content, citations } = await chatApi(text, activeBookId, {
         verseId: verseContext?.id,
       });
       

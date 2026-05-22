@@ -2,24 +2,42 @@
 node_modules/
 frontend/Anantha_Ui/node_modules/
 
-# Python
-backend/anantha_backend/.venv/
+# Python Virtual Environments
+.venv/
 .venv_backend/
+backend/anantha_backend/.venv/
+venv/
+
+# Data & Databases
+frontend/Anantha_Ui/src/data/verses.json
+backend/anantha_backend/verses.json
 backend/anantha_backend/chroma_db/
 chroma_db/
-backend.log
+*.sqlite3
+None/
 
-# Env
+# Env & Secrets
 .env
 *.env
+.env.local
+.env.*.local
 
-# IDE
+# Logs
+*.log
+backend.log
+
+# IDEs
 .idea/
 .vscode/
+*.swp
+*.swo
 
 # OS
 .DS_Store
+Thumbs.db
 
-# Misc
+# Build
 dist/
 build/
+out/
+.next/

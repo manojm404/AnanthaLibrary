@@ -1,56 +1,59 @@
 # System Architecture – Anantha Library
 
-Anantha Library uses a decoupled, three-tier architecture designed to provide a seamless conversational experience while ensuring user privacy and high performance.
+Anantha Library follows a decoupled, dynamic architecture designed to scale across an unlimited number of sacred texts while maintaining a sleek, privacy-focused user experience.
 
 ---
 
 ## 🏗️ 1. High-Level Overview
 
-The system is split into a **Frontend UI** (hosted on Vercel) and a **Backend AI Service** (hosted on a DigitalOcean droplet). The connection is handled via a server-side proxy in TanStack Start to ensure API keys and backend URLs remain secure.
+The system uses a **Client-Server-AI** pattern. The frontend remains agnostic of the specific books available, dynamically synchronizing its state with the backend's vector database.
 
 ```mermaid
 graph TD
-    Browser[Browser / User] -->|HTTPS| Frontend[Vercel: TanStack Start UI]
-    Frontend -->|Internal Proxy| Backend[DigitalOcean: Flask API]
-    Backend -->|Semantic Search| ChromaDB[(ChromaDB: Vector DB)]
-    Backend -->|Contextual Prompt| Groq[Groq API: Llama-3 LLM]
-    Groq -->|Dynamic Answer| Backend
-    Backend -->|Answer + Citations| Frontend
+    Browser[User Browser] -->|HTTPS| Frontend[Vercel: TanStack Start UI]
+    Frontend -->|Dynamic Book Discovery| API_Books[/api/books]
+    Frontend -->|Context-Filtered Query| API_Search[/api/search]
+    API_Search -->|Metadata Filter| ChromaDB[(ChromaDB: Vector DB)]
+    API_Search -->|Contextual Prompt| Groq[Groq API: Llama-3]
+    Groq -->|Dynamic Answer| API_Search
+    API_Search -->|Answer + Audio + Citations| Frontend
 ```
 
 ---
 
-## 🧠 2. The RAG Pipeline (Retrieval-Augmented Generation)
+## 🧠 2. The Dynamic RAG Pipeline
 
-The core "brain" of Anantha Library is the RAG pipeline. Here is how a user question is processed:
+The "brain" of the system is a context-aware **Retrieval-Augmented Generation** pipeline that supports multiple datasets simultaneously.
 
-1.  **Input:** User asks: *"I feel overwhelmed by my responsibilities."*
-2.  **Embedding:** The backend uses `sentence-transformers` to convert this text into a 384-dimensional mathematical vector.
-3.  **Retrieval:** ChromaDB searches its index to find the 5 verses whose vectors are most "similar" to the user's question (e.g., verses about *Karma Yoga* or *Duty*).
-4.  **Augmentation:** The backend builds a specialized prompt:
-    > "You are Anantha, a wise guide. User asks: [User Question]. Use these Gita verses as context: [Verse 1, Verse 2...]. Answer the user with compassion."
-5.  **Generation:** This prompt is sent to the **Groq API**. The LLM (Llama-3) generates a human-like response *using only the provided verses*.
-6.  **Response:** The UI displays the AI's answer alongside clickable **Citations** that lead the user back to the source verses.
+1.  **Selection:** The user selects a book (e.g., *Bhagavad Gita* or *Ramayana*) via the UI.
+2.  **Input:** User asks a question: *"What is the path to peace?"*
+3.  **Embedding & Filtering:** The backend converts the query into a vector and queries ChromaDB with a `where={"book_id": "active_book"}` metadata filter.
+4.  **Retrieval:** ChromaDB returns the top 5 most relevant passages strictly from the selected book.
+5.  **Augmentation:** The system builds a strict instruction prompt:
+    > "You are Anantha, a guide for [Book Title]. Use ONLY the following citations to answer: [Citations]. User: [Question]"
+6.  **Generation:** Groq generates a conversational response grounded in the retrieved text.
+7.  **Response:** The answer is delivered with original Sanskrit, translations, and **Audio URLs** if available.
 
 ---
 
 ## 🗄️ 3. Data Architecture
 
--   **Vector Storage:** `ChromaDB` stores the 701 verses of the Bhagavad Gita as high-dimensional vectors. This allows for "meaning-based" searching rather than just "keyword-based" searching.
--   **Local Storage:** User data (saved verses, journal entries, streaks, and theme settings) never leaves the user's browser. It is stored in `localStorage` for maximum privacy.
+-   **Vector Database (ChromaDB):** Uses `sentence-transformers/all-MiniLM-L6-v2` for embeddings. Data is stored persistently with metadata keys: `book_id`, `book_title`, `chapter`, `verse`, and `audio_url`.
+-   **Dynamic Ingestion:** A Registry-based Python script (`ingest.py`) allows developers to map any HuggingFace dataset columns into the unified Anantha schema.
+-   **Client Storage:** `localStorage` is used for bookmarks, journal entries, and the "last active book" setting.
 
 ---
 
-## 🛡️ 4. Security & Performance
+## 🛡️ 4. Resilience & Security
 
--   **API Proxying:** The frontend does not call the DigitalOcean droplet directly from the browser. Instead, it uses a **Server Side Handler** (`ai-proxy.server.ts`). This hides the backend IP and credentials from the public internet.
--   **Rate Limiting:** The backend implements a **Sliding-Window Rate Limiter**. If the Groq API limit is reached (30 requests per minute), the backend will automatically "pause" and wait for a slot to open up rather than returning an error to the user.
--   **Graceful Degradation:** If the backend is unreachable, the frontend automatically falls back to a "Mock Mode," using a local copy of the verses (`verses.json`) to provide basic search functionality.
+-   **Server-Side Proxying:** All AI and database calls are proxied through TanStack Start's server handlers (`ai-proxy.server.ts`). This prevents the leakage of the DigitalOcean IP address and the Groq API key to the client.
+-   **Sliding-Window Rate Limiting:** A thread-safe Python implementation ensures the backend never crashes due to Groq's 30 RPM limit. It pauses requests and executes them as slots become available.
+-   **Graceful Degradation:** If the backend droplet is down, the frontend switches to **Offline Mode**, utilizing a local `verses.json` cache and keyword search to maintain a functional experience.
 
 ---
 
-## ⚙️ 5. Deployment
+## ⚙️ 5. Deployment Workflow
 
--   **UI:** Continuous deployment via **Vercel**.
--   **Backend:** Dockerized and managed on **DigitalOcean**.
--   **API:** Groq (Cloud-based inference for high speed).
+-   **Frontend:** Auto-deployed via **Vercel** on every push to `main`.
+-   **Backend:** Python 3.x environment running on a **DigitalOcean Droplet**, managed via a Systemd service (recommended for production).
+-   **AI Inference:** **Groq Cloud** for sub-second Llama-3 responses.

@@ -15,6 +15,7 @@ import { MobileHeader } from "@/components/MobileHeader";
 import { BottomNav } from "@/components/BottomNav";
 import { PageTransition } from "@/components/PageTransition";
 import { Toaster } from "@/components/ui/sonner";
+import { LibraryProvider } from "@/hooks/use-library";
 
 function NotFoundComponent() {
   return (
@@ -132,21 +133,23 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <div className="relative min-h-dvh aurora-bg">
-          <div className="flex">
-            <AppSidebar />
-            <div className="flex-1 min-w-0 flex flex-col">
-              <MobileHeader />
-              <main className="flex-1 pb-20 md:pb-0">
-                <PageTransition>
-                  <Outlet />
-                </PageTransition>
-              </main>
+        <LibraryProvider>
+          <div className="relative min-h-dvh aurora-bg">
+            <div className="flex">
+              <AppSidebar />
+              <div className="flex-1 min-w-0 flex flex-col">
+                <MobileHeader />
+                <main className="flex-1 pb-20 md:pb-0">
+                  <PageTransition>
+                    <Outlet />
+                  </PageTransition>
+                </main>
+              </div>
             </div>
+            <BottomNav />
+            <Toaster position="top-center" />
           </div>
-          <BottomNav />
-          <Toaster position="top-center" />
-        </div>
+        </LibraryProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
