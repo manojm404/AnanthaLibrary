@@ -20,11 +20,10 @@ The biggest challenge was handling multiple books without confusing the AI.
 
 ---
 
-## 📊 3. The Dataset Journey: From Gita to a Universal Library
+## 📊 3. The Dataset Journey: From Mock to Truth
 Choosing the right data was critical. We evolved through three phases:
 - **Mock Data:** Initial 16 verses for UI scaffolding.
-- **Gita Context:** Integration of the full 701-verse Gita dataset.
-- **The Universal Expansion:** We successfully ingested over **125,000+ passages** from across the Sanatana Dharma canon, including the **Ramayana**, **Mahabharata** (all Parvas), **Srimad Bhagavatam**, **Manu Smriti**, and **Markandeya Purana**.
+- **Truth Discovery:** We switched to the `JDhruv14/Bhagavad-Gita_Dataset` from HuggingFace. It provides all 701 verses with original **Sanskrit**, fluent **English** translations, clear **Hindi** translations, and **Sanskrit Transliterations**.
 
 ---
 

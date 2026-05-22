@@ -18,6 +18,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiSearchRouteImport } from './routes/api/search'
 import { Route as ApiDailyRouteImport } from './routes/api/daily'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as ApiBooksRouteImport } from './routes/api/books'
 
 const WisdomRoute = WisdomRouteImport.update({
   id: '/wisdom',
@@ -64,6 +65,11 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiBooksRoute = ApiBooksRouteImport.update({
+  id: '/api/books',
+  path: '/api/books',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -72,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/library': typeof LibraryRoute
   '/search': typeof SearchRoute
   '/wisdom': typeof WisdomRoute
+  '/api/books': typeof ApiBooksRoute
   '/api/chat': typeof ApiChatRoute
   '/api/daily': typeof ApiDailyRoute
   '/api/search': typeof ApiSearchRoute
@@ -83,6 +90,7 @@ export interface FileRoutesByTo {
   '/library': typeof LibraryRoute
   '/search': typeof SearchRoute
   '/wisdom': typeof WisdomRoute
+  '/api/books': typeof ApiBooksRoute
   '/api/chat': typeof ApiChatRoute
   '/api/daily': typeof ApiDailyRoute
   '/api/search': typeof ApiSearchRoute
@@ -95,6 +103,7 @@ export interface FileRoutesById {
   '/library': typeof LibraryRoute
   '/search': typeof SearchRoute
   '/wisdom': typeof WisdomRoute
+  '/api/books': typeof ApiBooksRoute
   '/api/chat': typeof ApiChatRoute
   '/api/daily': typeof ApiDailyRoute
   '/api/search': typeof ApiSearchRoute
@@ -108,6 +117,7 @@ export interface FileRouteTypes {
     | '/library'
     | '/search'
     | '/wisdom'
+    | '/api/books'
     | '/api/chat'
     | '/api/daily'
     | '/api/search'
@@ -119,6 +129,7 @@ export interface FileRouteTypes {
     | '/library'
     | '/search'
     | '/wisdom'
+    | '/api/books'
     | '/api/chat'
     | '/api/daily'
     | '/api/search'
@@ -130,6 +141,7 @@ export interface FileRouteTypes {
     | '/library'
     | '/search'
     | '/wisdom'
+    | '/api/books'
     | '/api/chat'
     | '/api/daily'
     | '/api/search'
@@ -142,6 +154,7 @@ export interface RootRouteChildren {
   LibraryRoute: typeof LibraryRoute
   SearchRoute: typeof SearchRoute
   WisdomRoute: typeof WisdomRoute
+  ApiBooksRoute: typeof ApiBooksRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiDailyRoute: typeof ApiDailyRoute
   ApiSearchRoute: typeof ApiSearchRoute
@@ -212,6 +225,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/books': {
+      id: '/api/books'
+      path: '/api/books'
+      fullPath: '/api/books'
+      preLoaderRoute: typeof ApiBooksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -222,6 +242,7 @@ const rootRouteChildren: RootRouteChildren = {
   LibraryRoute: LibraryRoute,
   SearchRoute: SearchRoute,
   WisdomRoute: WisdomRoute,
+  ApiBooksRoute: ApiBooksRoute,
   ApiChatRoute: ApiChatRoute,
   ApiDailyRoute: ApiDailyRoute,
   ApiSearchRoute: ApiSearchRoute,

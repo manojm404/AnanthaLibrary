@@ -103,15 +103,16 @@ export async function chatApi(
  * Fetches the 'Verse of the Day' from the backend.
  * Falls back to a deterministic local selection based on the current date.
  */
-export async function getDailyVerse(): Promise<Verse> {
+export async function getDailyVerse(bookId?: string): Promise<Verse> {
   try {
-    const data = await getJson<Verse | { verse: Verse }>("/api/daily");
+    const path = bookId ? `/api/daily?book=${bookId}` : "/api/daily";
+    const data = await getJson<Verse | { verse: Verse }>(path);
     if ("verse" in data && typeof data.verse === "object") {
       return data.verse as Verse;
     }
     return data as Verse;
   } catch (err) {
     console.error("getDailyVerse failed, falling back to local:", err);
-    return getVerseOfDay();
+    return getVerseOfDay(bookId);
   }
 }

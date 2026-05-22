@@ -10,7 +10,7 @@
  */
 import { ALL_VERSES, getVerseOfDay, searchVerses, type Verse } from "./verses";
 
-const TIMEOUT_MS = 10_000;
+const TIMEOUT_MS = 30_000;
 
 // Predefined thoughtful responses used when the backend is unreachable
 const FALLBACK_REPLIES = [

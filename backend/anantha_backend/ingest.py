@@ -96,7 +96,7 @@ def fetch_all_verses(save_path: Path = FRONTEND_VERSES):
             
         time.sleep(0.5)
         
-    return _merge_and_save(all_verses, save_path)
+    return _save_verses(all_verses, save_path)
 
 
 def load_local_verses(path: Path = FRONTEND_VERSES):
@@ -110,22 +110,16 @@ def load_local_verses(path: Path = FRONTEND_VERSES):
     return []
 
 
-def _merge_and_save(new_verses: list, save_path: Path):
-    """Merges new verses with existing local JSON to avoid overwriting other books."""
-    existing = load_local_verses(save_path)
-    verse_map = {v['id']: v for v in existing}
-    for v in new_verses:
-        verse_map[v['id']] = v
-    
-    final_list = list(verse_map.values())
+def _save_verses(verses: list, save_path: Path):
+    """Saves verses to the local JSON file."""
     save_path.parent.mkdir(parents=True, exist_ok=True)
     with open(save_path, "w", encoding="utf-8") as f:
-        json.dump(final_list, f, ensure_ascii=False, indent=2)
-    print(f"Saved {len(final_list)} total entries to {save_path}")
-    return final_list
+        json.dump(verses, f, ensure_ascii=False, indent=2)
+    print(f"Saved {len(verses)} total entries to {save_path}")
+    return verses
 
 
-# Registry of known datasets and their mapping configurations
+# Registry of known datasets - Focused only on the Gita
 DATASET_REGISTRY = {
     "gita": {
         "dataset_name": "JDhruv14/Bhagavad-Gita_Dataset",
@@ -138,76 +132,6 @@ DATASET_REGISTRY = {
             "sanskrit": "sanskrit",
             "english": "english",
             "hindi": "hindi",
-            "transliteration": "transliteration"
-        }
-    },
-    "ramayana": {
-        "dataset_name": "JDhruv14/Ramayana",
-        "book_id": "ramayana",
-        "book_title": "Ramayana",
-        "id_parts": ["kanda", "sarga", "shloka_no"],
-        "mapping": {
-            "chapter": "kanda",
-            "section": "sarga",
-            "verse": "shloka_no",
-            "sanskrit": "shloka",
-            "english": "translation",
-            "transliteration": "transliteration"
-        }
-    },
-    "mahabharata": {
-        "dataset_name": "JDhruv14/Mahabharata",
-        "book_id": "mahabharata",
-        "book_title": "Mahabharata",
-        "id_parts": ["book_name", "chapter_no", "verse_no"],
-        "mapping": {
-            "chapter": "book_name",
-            "section": "chapter_no",
-            "verse": "verse_no",
-            "sanskrit": "sanskrit_text",
-            "english": "translation",
-            "transliteration": "transliteration"
-        }
-    },
-    "manu_smriti": {
-        "dataset_name": "JDhruv14/Manu_Smriti",
-        "book_id": "manu_smriti",
-        "book_title": "Manu Smriti",
-        "id_parts": ["chapter_no", "verse_no"],
-        "mapping": {
-            "chapter": "chapter_no",
-            "verse": "verse_no",
-            "sanskrit": "sanskrit",
-            "english": "translation",
-            "transliteration": "transliteration"
-        }
-    },
-    "markandeya_purana": {
-        "dataset_name": "JDhruv14/Markandeya_Purana",
-        "book_id": "markandeya_purana",
-        "book_title": "Markandeya Purana",
-        "id_parts": ["book_name", "chapter_no", "verse_no"],
-        "mapping": {
-            "chapter": "book_name",
-            "section": "chapter_no",
-            "verse": "verse_no",
-            "sanskrit": "sanskrit",
-            "english": "translation",
-            "transliteration": "transliteration"
-        }
-    },
-    "srimad_bhagavatam": {
-        "dataset_name": "JDhruv14/Srimad_Bhagavatam",
-        "book_id": "srimad_bhagavatam",
-        "book_title": "Srimad Bhagavatam",
-        "id_parts": ["book", "canto_no", "chapter_no", "verse_no"],
-        "mapping": {
-            "chapter": "chapter_no",
-            "section": "canto_no",
-            "verse": "verse_no",
-            "book": "book",
-            "sanskrit": "sanskrit",
-            "english": "translation",
             "transliteration": "transliteration"
         }
     }
@@ -259,7 +183,7 @@ def fetch_huggingface_dataset(book_id: str, save_path: Path = FRONTEND_VERSES):
         
         all_verses.append(processed)
         
-    return _merge_and_save(all_verses, save_path)
+    return _save_verses(all_verses, save_path)
 
 
 def main():
@@ -270,7 +194,19 @@ def main():
     parser.add_argument("--fetch-api", action="store_true", help="Fetch Gita from bhagavadgita.io")
     parser.add_argument("--ingest", action="store_true", help="Ingest local JSON into ChromaDB")
     parser.add_argument("--list", action="store_true", help="List supported books")
+    parser.add_argument("--purge", action="store_true", help="Delete the vector database and local verses")
     args = parser.parse_args()
+
+    if args.purge:
+        db_path = Path(__file__).resolve().parent / "chroma_db"
+        if db_path.exists():
+            import shutil
+            shutil.rmtree(db_path)
+            print(f"Purged vector database at {db_path}")
+        if FRONTEND_VERSES.exists():
+            FRONTEND_VERSES.unlink()
+            print(f"Purged local verses at {FRONTEND_VERSES}")
+        return
 
     if args.list:
         print("Supported Books:")

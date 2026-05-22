@@ -1,34 +1,34 @@
 # 🕉️ Anantha Library
 
-Anantha Library is a highly scalable, AI-powered spiritual companion for exploring the vast wisdom of Sanatana Dharma. Initially built for the **Bhagavad Gita**, it has evolved into a multi-text platform using **Retrieval-Augmented Generation (RAG)** to provide semantic search, conversational guidance, and audio recitations for various sacred texts including the Ramayana, Mahabharata, and Puranas.
+Anantha Library is a modern, AI-powered spiritual companion for exploring the **Bhagavad Gita**. Using **Retrieval-Augmented Generation (RAG)**, Anantha provides semantic search and a conversational interface, allowing users to ask life questions and receive guidance grounded in the eternal wisdom of the Gita.
 
 ---
 
 ## ✨ Key Features
 
-- **🧠 Multi-Text AI Chat:** Converse with "Anantha," an AI guide that dynamically adapts its wisdom based on the book you select (Gita, Ramayana, etc.).
-- **📖 Dynamic Book Selector:** A unified UI that automatically detects and lists all ingested sacred texts from the backend.
-- **🔍 Context-Aware Semantic Search:** Find verses and passages by meaning, feeling, or reference, isolated specifically to your chosen book.
+- **🧠 Conversational AI:** Chat with "Anantha," an AI guide that retrieves relevant verses from the Bhagavad Gita to answer your personal questions.
+- **🔍 Semantic Search:** Find verses by meaning and emotion (e.g., searching for "anxiety" or "purpose") rather than just keywords.
 - **🔊 Sanskrit Audio Integration:** Listen to the eternal vibrations of Sanskrit chanting directly within the verse cards.
-- **📅 Personalized Daily Wisdom:** Receive a "Verse of the Day" filtered by your active book to ground your daily practice.
-- **📚 Local Library & Journaling:** Save favorites and record your reflections privately in your browser.
+- **📅 Daily Wisdom:** A dedicated page for a "Verse of the Day" with reflection and practice prompts.
+- **📚 Personal Library:** Save your favorite verses to a local library for offline study.
+- **🌐 Multi-Language Support:** Full support for Sanskrit, English, and Hindi translations.
 
 ---
 
 ## 🛠️ Tech Stack
 
-### Frontend (The Interface)
+### Frontend
 - **Framework:** TanStack Start (React + TypeScript)
-- **Styling:** Tailwind CSS + shadcn/ui (Glassmorphism design)
-- **State Management:** React Context (LibraryProvider) for dynamic book synchronization.
-- **Persistence:** LocalStorage for privacy-first user data.
+- **Styling:** Tailwind CSS + shadcn/ui
+- **State Management:** TanStack Query + React Hooks
+- **Persistence:** LocalStorage for user preferences and saved verses.
 
 ### Backend (The AI Engine)
 - **API Server:** Flask (Python)
-- **Vector Database:** ChromaDB (Multi-collection ready with metadata filtering)
+- **Vector Database:** ChromaDB (for semantic similarity searching)
 - **Embeddings:** `sentence-transformers` (all-MiniLM-L6-v2)
-- **LLM Engine:** Groq API (Blazing-fast Llama-3 inference)
-- **Data Ingestion:** Dynamic Python pipeline supporting any HuggingFace dataset.
+- **LLM Engine:** Groq API (running Llama-3.3-70b-versatile)
+- **Dataset:** `JDhruv14/Bhagavad-Gita_Dataset` (HuggingFace)
 
 ---
 
@@ -47,13 +47,9 @@ cd AnanthaLibrary
    ```text
    GROQ_API_KEY=your_gsk_key_here
    ```
-4. **Dynamic Ingestion:**
+4. Ingest the data: 
    ```bash
-   # Ingest the Gita
-   python backend/anantha_backend/ingest.py --book gita --fetch --ingest
-   
-   # Ingest the Ramayana (Example)
-   python backend/anantha_backend/ingest.py --book ramayana --fetch --ingest
+   python backend/anantha_backend/ingest.py --fetch --ingest
    ```
 5. Start the server: `FLASK_APP=backend/anantha_backend/app.py flask run --port=8000`
 

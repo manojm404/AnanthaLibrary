@@ -24,7 +24,7 @@ function WisdomPage() {
   const { activeBookId } = useLibrary();
   const [verse, setVerse] = useState<Verse>(() => getVerseOfDay(activeBookId));
   useEffect(() => {
-    getDailyVerse().then(setVerse).catch(() => {});
+    getDailyVerse(activeBookId).then(setVerse).catch(() => {});
   }, [activeBookId]);
   const { text, setText } = useJournal();
   const { streak, appliedToday, apply } = useStreak();

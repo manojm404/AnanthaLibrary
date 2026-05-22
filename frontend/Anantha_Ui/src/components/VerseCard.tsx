@@ -69,21 +69,28 @@ export function VerseCard({
       )}
     >
       <header className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary tracking-wide">
-            {verse.book_title || "Gita"} {getReference(verse)}
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold text-primary tracking-wider uppercase">
+              {verse.book_title || "Sacred Text"}
+            </span>
+            {verse.audio_url && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-6 w-6 rounded-full hover:bg-primary/20 text-primary"
+                onClick={toggleAudio}
+                aria-label={isPlaying ? "Pause audio" : "Play audio"}
+              >
+                {isPlaying ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3 ml-0.5" />}
+              </Button>
+            )}
+          </div>
+          <span className="text-[11px] text-muted-foreground font-medium ml-1">
+            {verse.chapter && `Chapter/Kanda: ${verse.chapter}`}
+            {verse.section && ` • Section/Sarga: ${verse.section}`}
+            {verse.verse && ` • Verse: ${verse.verse}`}
           </span>
-          {verse.audio_url && (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-6 w-6 rounded-full hover:bg-primary/20 text-primary"
-              onClick={toggleAudio}
-              aria-label={isPlaying ? "Pause audio" : "Play audio"}
-            >
-              {isPlaying ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3 ml-0.5" />}
-            </Button>
-          )}
         </div>
         <div className="flex items-center -mr-2">
           {showSave && <SaveHeartButton verse={verse} />}

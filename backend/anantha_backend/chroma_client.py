@@ -112,7 +112,7 @@ def query(query_text: str, k: int = 5, book_id: str = None, collection_name: str
         query_embeddings=[q_emb], 
         n_results=k, 
         where=where_filter,
-        include=["metadatas", "documents", "ids"]
+        include=["metadatas", "documents"]
     )  # type: ignore
     
     # Format the results into a developer-friendly list of dictionaries
